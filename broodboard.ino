@@ -27,6 +27,10 @@ OneWire oneWire(TEMPERATURE_PIN);
 // Pass our oneWire reference to Dallas Temperature sensor
 DallasTemperature sensors(&oneWire);
 
+unsigned long previousMillis = 0;
+const long interval = 10000; // Interval in milliseconds to switch between sensor readings (10 seconds)
+bool displayTemperatureMoisture = true; // Flag to toggle display between temperature/moisture and ultrasonic/water
+
 void setup() {
   Serial.begin(9600);   // Initialize serial communication
   lcd_1.begin(16, 2);    // Set up the number of columns and rows on the LCD.
@@ -47,6 +51,29 @@ void setup() {
 }
 
 void loop() {
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    displayTemperatureMoisture = !displayTemperatureMoisture; // Toggle display flag
+  }
+
+  if (displayTemperatureMoisture) {
+    displayTemperatureMoistureValues();
+  } else {
+    displayUltrasonicWaterValues();
+  }
+
+  // Output temperature to Serial Monitor (for continuous monitoring)
+  float temperatureC = sensors.getTempCByIndex(0);
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" °C");
+
+  delay(100); // Adjust delay as needed to ensure responsiveness
+}
+
+void displayTemperatureMoistureValues() {
   // Request temperature from DS18B20 sensor
   sensors.requestTemperatures();
 
@@ -57,14 +84,9 @@ void loop() {
   int moistureSensorValue = analogRead(MOISTURE_PIN);
   int ldrValue = analogRead(LDR_PIN);
 
-  // Read water sensor value
-  int waterSensorValue = analogRead(WATER_SENSOR_PIN);
-
-  // Read ultrasonic sensor distance
-  float ultrasonicDistance = readUltrasonicDistance();
-
   // Print temperature to LCD
-  lcd_1.setCursor(5, 0);
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("Temp:     "); // Ensure it always prints "Temp:" to reset the display
   lcd_1.print(temperatureC, 1); // Print temperature with one decimal place
   lcd_1.setCursor(0, 1);
   lcd_1.print("Moisture: ");
@@ -90,22 +112,29 @@ void loop() {
     digitalWrite(LED2_PIN, LOW);
     digitalWrite(LED3_PIN, LOW);
   }
+}
 
-  // Output temperature to Serial Monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.println(" °C");
+void displayUltrasonicWaterValues() {
+  // Clear previous temperature and moisture values on LCD
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("                "); // Clear temperature display
+  lcd_1.setCursor(0, 1);
+  lcd_1.print("                "); // Clear moisture display
 
-  // Output water sensor value to Serial Monitor
-  Serial.print("Water Sensor Value: ");
-  Serial.println(waterSensorValue);
+  // Read water sensor value
+  int waterSensorValue = analogRead(WATER_SENSOR_PIN);
 
-  // Output ultrasonic sensor distance to Serial Monitor
-  Serial.print("Ultrasonic Distance: ");
-  Serial.print(ultrasonicDistance);
-  Serial.println(" cm");
+  // Read ultrasonic sensor distance
+  float ultrasonicDistance = readUltrasonicDistance();
 
-  delay(1000); // Wait for 1 second
+  // Print ultrasonic and water sensor values to LCD
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("Water: ");
+  lcd_1.print(waterSensorValue);
+  lcd_1.setCursor(0, 1);
+  lcd_1.print("Distance: ");
+  lcd_1.print(ultrasonicDistance);
+  lcd_1.print(" cm   "); // Clear any remaining characters
 }
 
 void moveServo(int degrees) {
