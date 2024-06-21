@@ -20,7 +20,7 @@ void setup() {
 
 void loop() {
   // Control LEDs based on LDR value (example)
-  if (ldrValue < 20) {
+  if (ldrValue < 60) {
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, HIGH);
     digitalWrite(LED3_PIN, HIGH);
