@@ -9,6 +9,7 @@
 #define LED3_PIN 8           // Digital pin for LED 3
 #define SERVO_PIN 9          // PWM pin for servo motor
 #define TEMPERATURE_PIN A0   // Analog pin for temperature sensor
+#define WATER_SENSOR_PIN 13  // Digital pin for water sensor
 
 // LCD pin definitions
 LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2); // RS, Enable, D4, D5, D6, D7
@@ -24,6 +25,7 @@ void setup() {
   pinMode(LED1_PIN, OUTPUT);
   pinMode(LED2_PIN, OUTPUT);
   pinMode(LED3_PIN, OUTPUT);
+  pinMode(WATER_SENSOR_PIN, INPUT); // Set water sensor pin as input
 
   // Initialize servo motor
   servoMotor.attach(SERVO_PIN);
@@ -36,10 +38,11 @@ void loop() {
   // Convert analog reading to temperature in Celsius (example conversion)
   float temperatureC = map(tempSensorValue, 0, 1023, 0, 100); // Adjust the mapping according to your sensor characteristics
 
-  // Read other sensor values (example readings)
+  // Read other sensor values
   int moistureSensorValue = analogRead(MOISTURE_PIN);
   int ldrValue = analogRead(LDR_PIN);
-  
+  int waterSensorValue = digitalRead(WATER_SENSOR_PIN); // Read water sensor
+
   // Print temperature to LCD
   lcd_1.setCursor(5, 0);
   lcd_1.print(temperatureC, 1); // Print temperature with one decimal place
@@ -57,7 +60,7 @@ void loop() {
     moveServo(90);  // Move servo motor to a neutral position
   }
 
-  // Control LEDs based on LDR value (example)
+  // Control LEDs based on LDR value
   if (ldrValue < 20) {
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, HIGH);
@@ -68,10 +71,14 @@ void loop() {
     digitalWrite(LED3_PIN, LOW);
   }
 
+  // Output water sensor value to Serial Monitor
+  Serial.print("Water Sensor Value: ");
+  Serial.println(waterSensorValue);
+
   // Output temperature to Serial Monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.println(" °C");
+ // Serial.print("Temperature: ");
+ // Serial.print(temperatureC);
+ // Serial.println(" °C");
 
   delay(1000); // Wait for 1 second
 }
