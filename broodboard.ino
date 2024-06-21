@@ -1,5 +1,7 @@
 #include <LiquidCrystal.h>
 #include <Servo.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 // Pin definitions
 #define MOISTURE_PIN A1       // Analog pin for moisture sensor
@@ -8,16 +10,22 @@
 #define LED2_PIN 7            // Digital pin for LED 2
 #define LED3_PIN 8            // Digital pin for LED 3
 #define SERVO_PIN 9           // PWM pin for servo motor
-#define TEMPERATURE_PIN A0    // Analog pin for temperature sensor
-#define ULTRASONIC_TRIG_PIN A3  // Digital pin for ultrasonic sensor trigger
-#define ULTRASONIC_ECHO_PIN A4  // Digital pin for ultrasonic sensor echo
-#define WATER_SENSOR_PIN 13    // Digital pin for water sensor
+#define TEMPERATURE_PIN 10    // Digital pin for DS18B20 temperature sensor
+#define WATER_SENSOR_PIN A5   // Analog pin for water sensor
+#define ULTRASONIC_TRIG_PIN A3 // Digital pin for ultrasonic sensor trigger
+#define ULTRASONIC_ECHO_PIN A4 // Digital pin for ultrasonic sensor echo
 
 // LCD pin definitions
 LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2); // RS, Enable, D4, D5, D6, D7
 
 // Servo motor object
 Servo servoMotor;
+
+// Setup a oneWire instance to communicate with DS18B20 temperature sensor
+OneWire oneWire(TEMPERATURE_PIN);
+
+// Pass our oneWire reference to Dallas Temperature sensor
+DallasTemperature sensors(&oneWire);
 
 void setup() {
   Serial.begin(9600);   // Initialize serial communication
@@ -27,30 +35,33 @@ void setup() {
   pinMode(LED1_PIN, OUTPUT);
   pinMode(LED2_PIN, OUTPUT);
   pinMode(LED3_PIN, OUTPUT);
-  pinMode(ULTRASONIC_TRIG_PIN, OUTPUT); // Set ultrasonic trigger pin as output
-  pinMode(ULTRASONIC_ECHO_PIN, INPUT);  // Set ultrasonic echo pin as input
-  pinMode(WATER_SENSOR_PIN, INPUT);     // Set water sensor pin as input
+  pinMode(WATER_SENSOR_PIN, INPUT);    // Set water sensor pin as input
+  pinMode(ULTRASONIC_TRIG_PIN, OUTPUT); // Set ultrasonic sensor trigger pin as output
+  pinMode(ULTRASONIC_ECHO_PIN, INPUT);  // Set ultrasonic sensor echo pin as input
 
   // Initialize servo motor
   servoMotor.attach(SERVO_PIN);
+
+  // Start up the DallasTemperature library
+  sensors.begin();
 }
 
 void loop() {
-  // Read temperature from analog pin A0
-  int tempSensorValue = analogRead(TEMPERATURE_PIN);
-  
-  // Convert analog reading to temperature in Celsius (example conversion)
-  float temperatureC = map(tempSensorValue, 0, 1023, 0, 100); // Adjust the mapping according to your sensor characteristics
+  // Request temperature from DS18B20 sensor
+  sensors.requestTemperatures();
+
+  // Read temperature in Celsius
+  float temperatureC = sensors.getTempCByIndex(0);
 
   // Read other sensor values
   int moistureSensorValue = analogRead(MOISTURE_PIN);
   int ldrValue = analogRead(LDR_PIN);
 
-  // Read ultrasonic sensor distance
-  float distance = readUltrasonicDistance();
-
   // Read water sensor value
-  int waterSensorValue = digitalRead(WATER_SENSOR_PIN);
+  int waterSensorValue = analogRead(WATER_SENSOR_PIN);
+
+  // Read ultrasonic sensor distance
+  float ultrasonicDistance = readUltrasonicDistance();
 
   // Print temperature to LCD
   lcd_1.setCursor(5, 0);
@@ -80,19 +91,19 @@ void loop() {
     digitalWrite(LED3_PIN, LOW);
   }
 
-  // Output ultrasonic sensor distance to Serial Monitor
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+  // Output temperature to Serial Monitor
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" °C");
 
   // Output water sensor value to Serial Monitor
   Serial.print("Water Sensor Value: ");
   Serial.println(waterSensorValue);
 
-  // Output temperature to Serial Monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.println(" °C");
+  // Output ultrasonic sensor distance to Serial Monitor
+  Serial.print("Ultrasonic Distance: ");
+  Serial.print(ultrasonicDistance);
+  Serial.println(" cm");
 
   delay(1000); // Wait for 1 second
 }
@@ -104,18 +115,18 @@ void moveServo(int degrees) {
 }
 
 float readUltrasonicDistance() {
-  // Trigger ultrasonic sensor
+  // Trigger pulse to the ultrasonic sensor
   digitalWrite(ULTRASONIC_TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(ULTRASONIC_TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(ULTRASONIC_TRIG_PIN, LOW);
 
-  // Measure the duration of the echo pulse
+  // Measure the duration of the pulse from the echo pin
   long duration = pulseIn(ULTRASONIC_ECHO_PIN, HIGH);
 
-  // Calculate distance in centimeters (speed of sound is 343 m/s or 0.0343 cm/microsecond)
-  float distance = duration * 0.0343 / 2;
+  // Calculate distance in centimeters
+  float distance = duration * 0.034 / 2; // Speed of sound is 34 cm per millisecond
 
   return distance;
 }
