@@ -11,6 +11,7 @@
 #define TEMPERATURE_PIN A0    // Analog pin for temperature sensor
 #define ULTRASONIC_TRIG_PIN A3  // Digital pin for ultrasonic sensor trigger
 #define ULTRASONIC_ECHO_PIN A4  // Digital pin for ultrasonic sensor echo
+#define WATER_SENSOR_PIN 13    // Digital pin for water sensor
 
 // LCD pin definitions
 LiquidCrystal lcd_1(12, 11, 5, 4, 3, 2); // RS, Enable, D4, D5, D6, D7
@@ -28,6 +29,7 @@ void setup() {
   pinMode(LED3_PIN, OUTPUT);
   pinMode(ULTRASONIC_TRIG_PIN, OUTPUT); // Set ultrasonic trigger pin as output
   pinMode(ULTRASONIC_ECHO_PIN, INPUT);  // Set ultrasonic echo pin as input
+  pinMode(WATER_SENSOR_PIN, INPUT);     // Set water sensor pin as input
 
   // Initialize servo motor
   servoMotor.attach(SERVO_PIN);
@@ -46,6 +48,9 @@ void loop() {
 
   // Read ultrasonic sensor distance
   float distance = readUltrasonicDistance();
+
+  // Read water sensor value
+  int waterSensorValue = digitalRead(WATER_SENSOR_PIN);
 
   // Print temperature to LCD
   lcd_1.setCursor(5, 0);
@@ -79,6 +84,10 @@ void loop() {
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.println(" cm");
+
+  // Output water sensor value to Serial Monitor
+  Serial.print("Water Sensor Value: ");
+  Serial.println(waterSensorValue);
 
   // Output temperature to Serial Monitor
   Serial.print("Temperature: ");
