@@ -14,6 +14,7 @@
 #define WATER_SENSOR_PIN A5     // Analog pin for water sensor
 #define ULTRASONIC_TRIG_PIN A3  // Digital pin for ultrasonic sensor trigger
 #define ULTRASONIC_ECHO_PIN A4  // Digital pin for ultrasonic sensor echo
+#define BUZZER_PIN 1            // Digital pin for buzzer (changed to pin 1)
 #define PUSH_BUTTON_PIN 13      // Digital pin for push button
 
 // LCD pin definitions
@@ -45,6 +46,7 @@ void setup() {
   pinMode(WATER_SENSOR_PIN, INPUT);     // Set water sensor pin as input
   pinMode(ULTRASONIC_TRIG_PIN, OUTPUT); // Set ultrasonic sensor trigger pin as output
   pinMode(ULTRASONIC_ECHO_PIN, INPUT);  // Set ultrasonic sensor echo pin as input
+  pinMode(BUZZER_PIN, OUTPUT);          // Set buzzer pin as output
   pinMode(PUSH_BUTTON_PIN, INPUT_PULLUP); // Set push button pin as input with internal pull-up resistor
 
   // Initialize servo motor
@@ -60,6 +62,9 @@ void loop() {
     toggleDisplayMode(); // Toggle display mode immediately
     delay(200); // Button debounce delay
     lcd_1.clear(); // Clear LCD when switching display
+    if (currentMode == TEMPERATURE_MODE) {
+      lcd_1.print("Temp:     C"); // Print temperature label after clearing
+    }
   }
 
   // Update display based on current mode
@@ -145,6 +150,15 @@ void updateSensorDataDisplay() {
   lcd_1.print("Distance: ");
   lcd_1.print(distance);
   lcd_1.print(" cm  ");
+
+  // Activate buzzer if distance is above 10cm
+  if (distance < 10) {
+    digitalWrite(BUZZER_PIN, HIGH);
+    
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);
+    
+  }
 
   // Output ultrasonic sensor distance to Serial Monitor
   Serial.print("Distance: ");
