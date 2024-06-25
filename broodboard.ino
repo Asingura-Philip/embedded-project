@@ -112,7 +112,7 @@ void updateTemperatureDisplay() {
 
   // Control LEDs based on LDR value (example)
   int ldrValue = analogRead(LDR_PIN);
-  if (ldrValue < 60) {
+  if (ldrValue < 70) {
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, HIGH);
     digitalWrite(LED3_PIN, HIGH);
