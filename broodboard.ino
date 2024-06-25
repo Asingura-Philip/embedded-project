@@ -14,7 +14,7 @@
 #define WATER_SENSOR_PIN A5     // Analog pin for water sensor
 #define ULTRASONIC_TRIG_PIN A3  // Digital pin for ultrasonic sensor trigger
 #define ULTRASONIC_ECHO_PIN A4  // Digital pin for ultrasonic sensor echo
-#define BUZZER_PIN 1            // Digital pin for buzzer (changed to pin 1)
+#define BUZZER_PIN A5            // Digital pin for buzzer (changed to pin A5)
 #define PUSH_BUTTON_PIN 13      // Digital pin for push button
 
 // LCD pin definitions
@@ -152,7 +152,7 @@ void updateSensorDataDisplay() {
   lcd_1.print(" cm  ");
 
   // Activate buzzer if distance is above 10cm
-  if (distance < 10) {
+  if (distance > 10) {
     digitalWrite(BUZZER_PIN, HIGH);
     
   } else {
