@@ -57,6 +57,9 @@ void setup() {
 }
 
 void loop() {
+  int ldrValue = analogRead(LDR_PIN);
+  Serial.print("LDR Value: ");
+  Serial.println(ldrValue);
   // Check if the push button is pressed to toggle display
   if (digitalRead(PUSH_BUTTON_PIN) == LOW) {
     toggleDisplayMode(); // Toggle display mode immediately
@@ -112,15 +115,24 @@ void updateTemperatureDisplay() {
 
   // Control LEDs based on LDR value (example)
   int ldrValue = analogRead(LDR_PIN);
-  if (ldrValue < 70) {
-    digitalWrite(LED1_PIN, HIGH);
-    digitalWrite(LED2_PIN, HIGH);
-    digitalWrite(LED3_PIN, HIGH);
-  } else {
+  if (ldrValue > 40) {
+    // When ldrValue is greater than 40, turn off all LEDs
     digitalWrite(LED1_PIN, LOW);
     digitalWrite(LED2_PIN, LOW);
     digitalWrite(LED3_PIN, LOW);
-  }
+    } else if (ldrValue >= 20 && ldrValue <= 40) {
+    // For ldrValue between 20 and 40 (inclusive), turn on only LED3
+    digitalWrite(LED1_PIN, LOW);
+    digitalWrite(LED2_PIN, LOW);
+    digitalWrite(LED3_PIN, HIGH);
+    } else {
+    // When ldrValue is less than 20, turn on all LEDs
+    digitalWrite(LED1_PIN, HIGH);
+    digitalWrite(LED2_PIN, HIGH);
+    digitalWrite(LED3_PIN, HIGH);
+    }
+
+
 
   // Output temperature to Serial Monitor
   Serial.print("Temperature: ");
