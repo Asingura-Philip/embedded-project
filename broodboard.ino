@@ -11,7 +11,7 @@
 #define LED3_PIN 8              // Digital pin for LED 3
 #define SERVO_PIN 9             // PWM pin for servo motor
 #define TEMPERATURE_PIN 10      // Digital pin for temperature sensor
-#define WATER_SENSOR_PIN A5     // Analog pin for water sensor
+#define WATER_SENSOR_PIN A0     // Analog pin for water sensor
 #define ULTRASONIC_TRIG_PIN A3  // Digital pin for ultrasonic sensor trigger
 #define ULTRASONIC_ECHO_PIN A4  // Digital pin for ultrasonic sensor echo
 #define BUZZER_PIN A5            // Digital pin for buzzer (changed to pin A5)
@@ -105,9 +105,9 @@ void updateTemperatureDisplay() {
   lcd_1.print("   "); // Clear any remaining characters
 
   // Control servo motor based on temperature
-  if (temperatureC > 28.0) {
+  if (temperatureC > 25.0) {
     moveServo(180); // Move servo motor to the right (clockwise)
-  } else if (temperatureC < 26.0) {
+  } else if (temperatureC < 19.0) {
     moveServo(0);   // Move servo motor to the left (counterclockwise)
   } else {
     moveServo(90);  // Move servo motor to a neutral position
@@ -154,10 +154,12 @@ void updateSensorDataDisplay() {
   duration = pulseIn(ULTRASONIC_ECHO_PIN, HIGH);
   distance = duration * 0.034 / 2;
 
-  // Print water and ultrasonic sensor values to LCD
+  // Print water sensor value to LCD
   lcd_1.setCursor(0, 0);
   lcd_1.print("Water: ");
   lcd_1.print(waterSensorValue);
+
+  // Print ultrasonic sensor value to LCD
   lcd_1.setCursor(0, 1);
   lcd_1.print("Distance: ");
   lcd_1.print(distance);
@@ -166,16 +168,18 @@ void updateSensorDataDisplay() {
   // Activate buzzer if distance is above 10cm
   if (distance > 10) {
     digitalWrite(BUZZER_PIN, HIGH);
-    
   } else {
     digitalWrite(BUZZER_PIN, LOW);
-    
   }
 
   // Output ultrasonic sensor distance to Serial Monitor
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.println(" cm");
+
+  // Output water sensor value to Serial Monitor
+  Serial.print("Water: ");
+  Serial.println(waterSensorValue);
 }
 
 void moveServo(int degrees) {
