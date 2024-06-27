@@ -105,9 +105,9 @@ void updateTemperatureDisplay() {
   lcd_1.print("   "); // Clear any remaining characters
 
   // Control servo motor based on temperature
-  if (temperatureC > 25.0) {
+  if (temperatureC > 28.0) {
     moveServo(180); // Move servo motor to the right (clockwise)
-  } else if (temperatureC < 19.0) {
+  } else if (temperatureC < 26.0) {
     moveServo(0);   // Move servo motor to the left (counterclockwise)
   } else {
     moveServo(90);  // Move servo motor to a neutral position
