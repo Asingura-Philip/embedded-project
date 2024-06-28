@@ -105,9 +105,9 @@ void updateTemperatureDisplay() {
   lcd_1.print("   "); // Clear any remaining characters
 
   // Control servo motor based on temperature
-  if (temperatureC > 25.0) {
+  if (temperatureC > 27.0) {
     moveServo(180); // Move servo motor to the right (clockwise)
-  } else if (temperatureC < 19.0) {
+  } else if (temperatureC <25.0) {
     moveServo(0);   // Move servo motor to the left (counterclockwise)
   } else {
     moveServo(90);  // Move servo motor to a neutral position
@@ -115,12 +115,12 @@ void updateTemperatureDisplay() {
 
   // Control LEDs based on LDR value (example)
   int ldrValue = analogRead(LDR_PIN);
-  if (ldrValue > 40) {
+  if (ldrValue > 90) {
     // When ldrValue is greater than 40, turn off all LEDs
     digitalWrite(LED1_PIN, LOW);
     digitalWrite(LED2_PIN, LOW);
     digitalWrite(LED3_PIN, LOW);
-    } else if (ldrValue >= 20 && ldrValue <= 40) {
+    } else if (ldrValue >= 70 && ldrValue <= 90) {
     // For ldrValue between 20 and 40 (inclusive), turn on only LED3
     digitalWrite(LED1_PIN, LOW);
     digitalWrite(LED2_PIN, LOW);
